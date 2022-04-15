@@ -63,7 +63,6 @@ class WeatherApiServices {
       final weatherJson = json.decode(response.body);
 
       final Weather weather = Weather.fromJson(weatherJson);
-      print(weather);
 
       return weather;
     } catch (e) {
