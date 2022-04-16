@@ -4,6 +4,8 @@ import 'package:weather_cubit/cubits/weather/weather_cubit.dart';
 import 'package:weather_cubit/pages/search_page.dart';
 import 'package:weather_cubit/widgets/error_dialog.dart';
 
+import '../constants/constants.dart';
+
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
@@ -42,8 +44,26 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
+String _showTemperature(double temperature) {
+  return temperature.toStringAsFixed(2) + 'C';
+}
+
+Widget _showIcon(String abbr) {
+  return FadeInImage.assetNetwork(
+    placeholder: 'assets/images/loading.gif',
+    image: 'https://$kHost/static/img/weather/png/64/$abbr.png',
+    width: 64,
+    height: 64,
+  );
+}
+
 Widget _showWeather() {
   return BlocConsumer<WeatherCubit, WeatherState>(
+    listener: (context, state) {
+      if (state.status == WeatherStatus.error) {
+        errorDialog(context, state.error.errMsg);
+      }
+    },
     builder: (context, state) {
       if (state.status == WeatherStatus.initial) {
         return const Center(
@@ -71,17 +91,75 @@ Widget _showWeather() {
         );
       }
 
-      return Center(
-        child: Text(
-          state.weather.title,
-          style: const TextStyle(fontSize: 18.0),
-        ),
+      return ListView(
+        children: [
+          SizedBox(
+            height: MediaQuery.of(context).size.height / 6,
+          ),
+          Text(
+            state.weather.title,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 40.0,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(
+            height: 10.0,
+          ),
+          Text(
+            TimeOfDay.fromDateTime(state.weather.lastUpdated).format(context),
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 18.0),
+          ),
+          const SizedBox(height: 60.0),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                _showTemperature(state.weather.theTemp),
+                style: const TextStyle(
+                    fontSize: 30.0, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(
+                width: 20.0,
+              ),
+              Column(
+                children: [
+                  Text(
+                    _showTemperature(state.weather.maxTemp),
+                    style: const TextStyle(fontSize: 16.0),
+                  ),
+                  const SizedBox(
+                    height: 10.0,
+                  ),
+                  Text(
+                    _showTemperature(state.weather.minTemp),
+                    style: const TextStyle(fontSize: 16.0),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(
+            height: 40.0,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              const Spacer(),
+              _showIcon(state.weather.weatherStateAbbr),
+              Text(
+                state.weather.weatherStateName,
+                style: const TextStyle(
+                  fontSize: 32.0,
+                ),
+              ),
+              const Spacer(),
+            ],
+          ),
+        ],
       );
-    },
-    listener: (context, state) {
-      if (state.status == WeatherStatus.error) {
-        errorDialog(context, state.error.errMsg);
-      }
     },
   );
 }
