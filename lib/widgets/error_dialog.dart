@@ -10,11 +10,11 @@ void errorDialog(BuildContext context, String errorMessage) {
       barrierDismissible: false,
       builder: (context) {
         return CupertinoAlertDialog(
-          title: Text('Error'),
+          title: const Text('Error'),
           content: Text(errorMessage),
           actions: [
             CupertinoDialogAction(
-              child: Text('Ok'),
+              child: const Text('Ok'),
               onPressed: () => Navigator.pop(context),
             ),
           ],
